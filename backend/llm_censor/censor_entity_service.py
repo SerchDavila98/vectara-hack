@@ -3,12 +3,17 @@
 # Import necessary libraries
 import transformers
 from llama_index.llms import Ollama
-from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.vector_stores.qdrant import QdrantVectorStore
+from llama_index.core import (
+    VectorStoreIndex,
+    SimpleDirectoryReader,
+    StorageContext,
+    load_index_from_storage,
+)
 import qdrant_client
 from transformers import pipeline
 from transformers import pipeline
 import spacy
+import os
 
 
 # Function to censor sensitive information using Mixtral 8x7B
@@ -23,24 +28,22 @@ def censor_sensitive_information(input_text):
     return result[0]['generated_text']
 
 # Function to create and populate a vector database with LlamaIndex
-def create_vector_db_with_content(censored_content):
-    """
-    Takes censored content, creates a vector database with LlamaIndex, and populates it,
-    allowing for entity relationship analysis.
-    """
-    # Initialize Qdrant client and vector store
-    client = qdrant_client.QdrantClient(host="localhost", port=6333)  # Adjust host and port as needed
-    vector_store = QdrantVectorStore(client=client, collection_name="entity_relations")
-    
-    # Initialize LlamaIndex with Mixtral 8x7B
-    llm = Ollama(model="mixtral")  # Adjust the model identifier as needed
-    
-    # Prepare the data
-    documents = [{"content": censored_content}]  # This could be a list of censored texts
-    
-    # Index the documents
-    service_context = ServiceContext.from_defaults(llm=llm, embed_model="local")
-    index = VectorStoreIndex.from_documents(documents, service_context=service_context, vector_store=vector_store)
+def create_and_persist_index(data_dir="data", persist_dir="./storage"):
+    # Check if the storage directory already exists
+    if not os.path.exists(persist_dir):
+        # Load documents from the data directory
+        documents = SimpleDirectoryReader(data_dir).load_data()
+        # Create the index from documents
+        index = VectorStoreIndex.from_documents(documents)
+        # Persist the index for future use
+        index.storage_context.persist(persist_dir=persist_dir)
+        print("Index created and persisted.")
+    else:
+        # Load the existing index if storage directory exists
+        storage_context = StorageContext.from_defaults(persist_dir=persist_dir)
+        index = load_index_from_storage(storage_context)
+        print("Index loaded from storage.")
+    return index
     
     print("Vector database created and populated with censored content for entity relationship analysis.")
 
@@ -111,7 +114,14 @@ def censor_sensitive_information(input_text):
     entities = extract_entities(input_text)
     
     return censored_text, entities
-
+    
+def query_index(index, question):
+    # Create a query engine from the index
+    query_engine = index.as_query_engine()
+    # Perform the query
+    response = query_engine.query(question)
+    # Print the response
+    print(response)
 
 
 
