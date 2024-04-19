@@ -79,3 +79,12 @@ Navigate back to the root directory and start the backend server:
 ```bash
 python src/main.py
 ```
+
+## Tech Stack
+
+- ![Python](https://img.shields.io/badge/Python-%233776AB.svg?style=for-the-badge&logo=python&logoColor=white)
+- ![Next.js](https://img.shields.io/badge/Next.js-%23000000.svg?style=for-the-badge&logo=nextdotjs&logoColor=white)
+- ![Vectara](https://img.shields.io/badge/Vectara-%23593d88.svg?style=for-the-badge&logo=vectara&logoColor=white)
+- ![Mistral](https://img.shields.io/badge/Mistral-%234285F4.svg?style=for-the-badge&logo=mistral&logoColor=white)
+- ![OpenAI](https://img.shields.io/badge/OpenAI-%2334D399.svg?style=for-the-badge&logo=openai&logoColor=white)
+- ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
